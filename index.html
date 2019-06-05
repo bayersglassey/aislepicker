@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="/static/bootstrap-3.3.7-dist/css/bootstrap.min.css">
     <script src="/static/aislepicker.js"></script>
     <style>
-        #title, #loading {
+        #loading {
             text-align: center;
         }
         #main {
@@ -24,15 +24,17 @@
             height: 100%;
         }
         #controls {
-            max-width: 640px;
+            max-width: 600px;
+            max-height: 300px;
             margin: auto;
+            overflow-y: auto;
+            border: solid 1px #ddd;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 id="title">AislePicker</h1>
-        <h2 id="loading">Loading...</h2>
+        <h2 id="loading">Loading AislePicker...</h2>
         <div id="main" style="display: none">
             <canvas id="canvas" width=600 height=400>No canvas support!</canvas>
         </div>
@@ -53,26 +55,42 @@
                     <input type="text" name="route" value="...">
                 </p>
                 <p>
-                    <label for="total_dist">Total distance</label>
-                    <input type="text" name="total_dist" value="...">
+                    <label for="route_dist">Total route distance</label>
+                    <input type="text" name="route_dist" value="...">
                 </p>
                 <p>
                     <button type="button" name="optimize">Optimize</button>
                     <button type="button" name="randomize">Randomize</button>
                 </p>
+                <p>
+                    <label for="bin1">Select bin</label>
+                    <select name="bin1"></select>
+                </p>
             </div>
             <div id="controls_bin1">
-                <h3>Selected bin 1</h3>
+                <h3>Selected bin</h3>
                 <p>
                     <label for="bin1_label">Label</label>
                     <input type="text" name="bin1_label" value="...">
                 </p>
+                <p>
+                    <button type="button" name="bin1_add">Add to route</button>
+                    <button type="button" name="bin1_remove">Remove from route</button>
+                </p>
+                <p>
+                    <button type="button" name="bin1_move_left">Move left</button>
+                    <button type="button" name="bin1_move_right">Move right</button>
+                </p>
+                <p>
+                    <label for="bin2">Select another bin</label>
+                    <select name="bin2"></select>
+                </p>
             </div>
             <div id="controls_bin2">
-                <h3>Selected bin 2</h3>
+                <h3>Selected other bin</h3>
                 <p>
-                    <label for="bin1_label">Label</label>
-                    <input type="text" name="bin1_label" value="...">
+                    <label for="bin2_label">Label</label>
+                    <input type="text" name="bin2_label" value="...">
                 </p>
                 <p>
                     <label for="dist">Distance between selected bins</label>
