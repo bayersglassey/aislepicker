@@ -109,6 +109,19 @@ extend(Simulation.prototype, {
         if(i < 0 || i >= this.route.length - 1)return;
         this.route_swap(i, i+1);
     },
+    get_bin_path: function(bin1, bin2){
+        var path = [];
+        path.push({x: bin1.x, y: bin1.y});
+        if(bin1.y !== bin2.y){
+            var x_left = bin1.x + bin2.x;
+            var x_right = (1-bin1.x) + (1-bin2.x);
+            var path_x = x_left < x_right? 0: 1;
+            path.push({x: path_x, y: bin1.y});
+            path.push({x: path_x, y: bin2.y});
+        }
+        path.push({x: bin2.x, y: bin2.y});
+        return path;
+    },
     get_bin_dist: function(bin1, bin2){
         if(bin1.y === bin2.y)return Math.abs(bin1.x - bin2.x);
         var d = Math.abs(bin1.y - bin2.y);
@@ -162,7 +175,9 @@ extend(SimulationRunner.prototype, {
             var target = event.target;
             var bin_id = parseInt(target.value);
             var bin_attr = target.name.substr(0, 4);
-            runner[bin_attr] = isNaN(bin_id)? null: runner.sim.bins[bin_id];
+            var bin = isNaN(bin_id)? null: runner.sim.bins[bin_id];
+            runner[bin_attr] = bin;
+            if(!bin)runner.bin2 = null;
             runner.render();
         }
         function change_bin_label(event){
@@ -180,6 +195,23 @@ extend(SimulationRunner.prototype, {
         this.controls.bin1_label.addEventListener('change', change_bin_label);
         this.controls.bin2_label.addEventListener('change', change_bin_label);
 
+        this.controls.route.addEventListener('change', function(event){
+            var n_bins = runner.sim.bins.length;
+            var route = [];
+
+            var value = event.target.value;
+            var parts = value.split(',');
+            for(var i = 0; i < parts.length; i++){
+                var part = parts[i];
+                var bin_i = parseInt(part);
+                if(isNaN(bin_i) || bin_i < 0 || bin_i >= n_bins)continue;
+                if(route.indexOf(bin_i) >= 0)continue;
+                route.push(bin_i);
+            }
+
+            runner.sim.route = route;
+            runner.render();
+        });
         this.controls.bin1_add.addEventListener('click', function(event){
             runner.sim.route_add_bin(runner.bin1);
             runner.render();
@@ -256,6 +288,7 @@ extend(SimulationRunner.prototype, {
             }
 
             this.render_aisles();
+            this.render_route();
             this.render_bins();
         }
     },
@@ -314,12 +347,20 @@ extend(SimulationRunner.prototype, {
             ctx.fillRect(x, y, w, h);
         }
     },
+    render_route: function(){
+        var route = this.sim.route;
+        var bins = this.sim.bins;
+        for(var i = 0; i < route.length - 1; i++){
+            var bin1 = bins[route[i]];
+            var bin2 = bins[route[i+1]];
+            var path = this.sim.get_bin_path(bin1, bin2);
+            this.render_path(path, '#0f4', 2);
+        }
+    },
     render_bins: function(){
         var ctx = this.canvas.getContext('2d');
         var cw = this.canvas.width;
         var ch = this.canvas.height;
-        var stx = this.canvas.offsetWidth / cw;
-        var sty = this.canvas.offsetHeight / ch;
 
         var n_aisles = this.sim.n_aisles;
         var n_bins_per_aisle = this.sim.n_bins_per_aisle;
@@ -363,6 +404,51 @@ extend(SimulationRunner.prototype, {
             var font_w = ctx.measureText(bin.label).width;
             ctx.fillText(bin.label, x - font_w / 2, y + font_h / 2);
         }
+
+        if(this.bin1 && this.bin2){
+            var path = this.sim.get_bin_path(this.bin1, this.bin2);
+            this.render_path(path, '#f09', 3);
+        }
+    },
+    render_path: function(path, color, size){
+        var ctx = this.canvas.getContext('2d');
+        var cw = this.canvas.width;
+        var ch = this.canvas.height;
+
+        var border_x = this.border_x * cw;
+        var border_y = this.border_y * ch;
+        var store_w = cw - border_x * 2;
+        var store_h = ch - border_y * 2;
+
+        ctx.beginPath();
+        for(var i = 0; i < path.length - 1; i++){
+            var p0 = path[i];
+            var x0 = border_x + p0.x * store_w;
+            var y0 = border_y + p0.y * store_h;
+
+            var p1 = path[i+1];
+            var x1 = border_x + p1.x * store_w;
+            var y1 = border_y + p1.y * store_h;
+
+            var cx = (x0 + x1) / 2;
+            var cy = (y0 + y1) / 2;
+            if(x0 === x1){
+                if(x0 < cw / 2){
+                    cx -= .1 * ch;
+                }else{
+                    cx += .1 * ch;
+                }
+            }else{
+                cy -= .1 * ch;
+            }
+
+            ctx.moveTo(x0, y0);
+            ctx.quadraticCurveTo(cx, cy, x1, y1);
+        }
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = size;
+        ctx.stroke();
     },
 });
 
