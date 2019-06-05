@@ -4,6 +4,9 @@ A tiny Javascript widget for playing with
 [the Vehicle Routing Problem](https://en.wikipedia.org/wiki/Vehicle_routing_problem),
 a.k.a. "VHP" for short.
 
+Might be up and running at
+[aislepicker.bayersglassey.com](http://aislepicker.bayersglassey.com).
+
 
 ## Vehicle Routing Problem
 
