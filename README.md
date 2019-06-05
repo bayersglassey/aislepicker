@@ -28,3 +28,8 @@ The edge weights are calculated to simulate a shopper who can
 only travel back and forth along aisles, or up and down at the
 sides of the store to reach other aisles.
 
+
+## Screenshot
+
+![](/screenshots/alpha.png)
+
