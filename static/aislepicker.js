@@ -109,6 +109,37 @@ extend(Simulation.prototype, {
         if(i < 0 || i >= this.route.length - 1)return;
         this.route_swap(i, i+1);
     },
+    route_randomize: function(){
+        var old_route = this.route;
+        var new_route = [];
+        while(old_route.length > 0){
+            var i = Math.floor(Math.random() * old_route.length);
+            var bin_i = old_route.splice(i, 1)[0];
+            new_route.push(bin_i);
+        }
+        this.route = new_route;
+    },
+    route_optimize: function(n){
+        /* Stupid "genetic" algorithm: generate a lot of random routes,
+        keep the best one */
+        if(typeof n === 'undefined')n = 500;
+
+        var best_route = this.route.slice();
+        var best_dist = this.get_route_dist();
+        //console.log("INITIAL: " + best_route + " (" + best_dist + ")");
+        for(var i = 0; i < n; i++){
+            this.route_randomize();
+            var dist = this.get_route_dist();
+            //console.log("GENERATION " + i + "/" + n + ": " + this.route + " (" + dist + ")");
+            if(dist < best_dist){
+                //console.log("* * * UPDATING!");
+                best_route = this.route.slice();
+                best_dist = dist;
+            }
+            //console.log("BEST: " + best_route + " (" + best_dist + ")");
+        }
+        this.route = best_route;
+    },
     get_bin_path: function(bin1, bin2){
         var path = [];
         path.push({x: bin1.x, y: bin1.y});
@@ -212,6 +243,15 @@ extend(SimulationRunner.prototype, {
             runner.sim.route = route;
             runner.render();
         });
+        this.controls.randomize.addEventListener('click', function(event){
+            runner.sim.route_randomize();
+            runner.render();
+        });
+        this.controls.optimize.addEventListener('click', function(event){
+            runner.sim.route_optimize();
+            runner.render();
+        });
+
         this.controls.bin1_add.addEventListener('click', function(event){
             runner.sim.route_add_bin(runner.bin1);
             runner.render();
