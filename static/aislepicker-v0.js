@@ -21,7 +21,6 @@ function show(elem){showif(elem, true)}
 function hide(elem){showif(elem, false)}
 
 function drawCircle(ctx, x, y, r){
-    ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI * 2);
 }
 
@@ -435,6 +434,7 @@ extend(SimulationRunner.prototype, {
                 font_bold = true;
             }
 
+            ctx.beginPath();
             drawCircle(ctx, x, y, r);
             ctx.fillStyle = color;
             ctx.fill();

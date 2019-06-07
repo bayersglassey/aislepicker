@@ -14,8 +14,8 @@
             text-align: center;
         }
         #main {
-            max-width: 600px;
-            max-height: 400px;
+            max-width: 750px;
+            max-height: 500px;
             margin: auto;
             border: solid 1px #ddd;
         }
@@ -45,7 +45,7 @@
         <h1 id="title">AislePicker v1</h1>
         <h2 id="loading">Loading...</h2>
         <div id="main" style="display: none">
-            <canvas id="canvas" width=600 height=400>No canvas support!</canvas>
+            <canvas id="canvas" width="750" height="500">No canvas support!</canvas>
         </div>
         <form class="menu" id="menu_sim">
             <h3 class="menu-header">Simulation</h3>
@@ -56,6 +56,10 @@
             <p>
                 <label for="bgimg">Background Image (Store Floor Plan)</label>
                 <input type="text" name="bgimg" value="/static/img/default-floor-plan.png">
+            </p>
+            <p>
+                <label for="node_radius">Default Node Radius</label>
+                <input type="text" name="node_radius" value="8">
             </p>
         </form>
     </div>
