@@ -8,111 +8,18 @@
     <title>AislePicker</title>
 
     <link rel="stylesheet" href="/static/bootstrap-3.3.7-dist/css/bootstrap.min.css">
-    <script src="/static/aislepicker.js"></script>
-    <style>
-        #loading {
-            text-align: center;
-        }
-        #main {
-            max-width: 600px;
-            max-height: 400px;
-            margin: auto;
-            border: solid 1px #ddd;
-        }
-        #canvas {
-            width: 100%;
-            height: 100%;
-        }
-        #controls {
-            max-width: 600px;
-            max-height: 300px;
-            margin: auto;
-            overflow-y: auto;
-            border: solid 1px #ddd;
-        }
-    </style>
 </head>
 <body>
     <div class="container">
-        <h2 id="loading">Loading AislePicker...</h2>
-        <div id="main" style="display: none">
-            <canvas id="canvas" width=600 height=400>No canvas support!</canvas>
-        </div>
-        <form id="controls" style="display: none">
-            <h3>Simulation</h3>
-            <p>
-                <label for="n_aisles">Number of aisles</label>
-                <input type="text" name="n_aisles" value="3">
-            </p>
-            <p>
-                <label for="n_bins_per_aisle">Number of bins per aisle</label>
-                <input type="text" name="n_bins_per_aisle" value="4">
-            </p>
-            <div id="controls_route">
-                <h3>Route</h3>
-                <p>
-                    <label for="route">Route</label>
-                    <input type="text" name="route" value="...">
-                </p>
-                <p>
-                    <label for="route_dist">Total route distance</label>
-                    <input type="text" name="route_dist" value="...">
-                </p>
-                <p>
-                    <button type="button" name="optimize">Optimize</button>
-                    <button type="button" name="randomize">Randomize</button>
-                </p>
-                <p>
-                    <label for="bin1">Select bin</label>
-                    <select name="bin1"></select>
-                </p>
-            </div>
-            <div id="controls_bin1">
-                <h3>Selected bin</h3>
-                <p>
-                    <label for="bin1_label">Label</label>
-                    <input type="text" name="bin1_label" value="...">
-                </p>
-                <p>
-                    <button type="button" name="bin1_add">Add to route</button>
-                    <button type="button" name="bin1_remove">Remove from route</button>
-                </p>
-                <p>
-                    <button type="button" name="bin1_move_left">Move left</button>
-                    <button type="button" name="bin1_move_right">Move right</button>
-                </p>
-                <p>
-                    <label for="bin2">Select another bin</label>
-                    <select name="bin2"></select>
-                </p>
-            </div>
-            <div id="controls_bin2">
-                <h3>Selected other bin</h3>
-                <p>
-                    <label for="bin2_label">Label</label>
-                    <input type="text" name="bin2_label" value="...">
-                </p>
-                <p>
-                    <label for="dist">Distance between selected bins</label>
-                    <input type="text" name="dist" value="...">
-                </p>
-            </div>
-        </form>
+        <h1>AislePicker</h1>
+        <p>
+            Widgets for playing with the
+            <a href="https://en.wikipedia.org/wiki/Vehicle_routing_problem">Vehicle Routing Problem (VRP)</a>.
+        </p>
+        <ul>
+            <li><a href="/aislepicker-v0.html">Play with version 0</a></li>
+            <li><a href="/aislepicker-v1.html">Play with version 1</a></li>
+        </ul>
     </div>
-    <script>
-        'use strict';
-        var elems = {};
-        var elem_ids = [
-            'loading', 'main', 'canvas', 'controls',
-            'controls_route', 'controls_bin1', 'controls_bin2'];
-        for(var i = 0; i < elem_ids.length; i++){
-            var elem_id = elem_ids[i];
-            elems[elem_id] = document.getElementById(elem_id);
-        }
-        var runner = new SimulationRunner(elems);
-        var canvas = runner.canvas;
-        var ctx = canvas.getContext('2d');
-        runner.start();
-    </script>
 </body>
 </html>

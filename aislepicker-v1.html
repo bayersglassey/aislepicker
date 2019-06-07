@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>AislePicker v1</title>
+
+    <link rel="stylesheet" href="/static/bootstrap-3.3.7-dist/css/bootstrap.min.css">
+    <script src="/static/aislepicker-v1.js"></script>
+    <style>
+        #loading, #title {
+            text-align: center;
+        }
+        #main {
+            max-width: 600px;
+            max-height: 400px;
+            margin: auto;
+            border: solid 1px #ddd;
+        }
+        #canvas {
+            width: 100%;
+            height: 100%;
+            background-size: 100% 100%;
+        }
+        .menu h3 {
+            margin-top: 0;
+        }
+        .menu-header {
+            cursor: pointer;
+            user-select: none;
+        }
+        .menu {
+            position: absolute;
+            background: #eee;
+            border: solid 1px #ddd;
+            border-radius: 1em;
+            padding: 1em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="title">AislePicker v1</h1>
+        <h2 id="loading">Loading...</h2>
+        <div id="main" style="display: none">
+            <canvas id="canvas" width=600 height=400>No canvas support!</canvas>
+        </div>
+        <form class="menu" id="menu_sim">
+            <h3 class="menu-header">Simulation</h3>
+            <p>
+                <label for="title">Title</label>
+                <input type="text" name="title" value="New Simulation">
+            </p>
+            <p>
+                <label for="bgimg">Background Image (Store Floor Plan)</label>
+                <input type="text" name="bgimg" value="/static/img/default-floor-plan.png">
+            </p>
+        </form>
+    </div>
+    <script>
+        'use strict';
+        var elems = {};
+        var elem_ids = [
+            'loading', 'main', 'canvas', 'menu_sim',
+        ];
+        for(var i = 0; i < elem_ids.length; i++){
+            var elem_id = elem_ids[i];
+            elems[elem_id] = document.getElementById(elem_id);
+        }
+        var runner = new SimulationRunner(elems);
+        var canvas = runner.canvas;
+        var ctx = canvas.getContext('2d');
+    </script>
+</body>
+</html>
