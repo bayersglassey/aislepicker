@@ -140,6 +140,8 @@ function Menu(elem){
     this.dragging = false;
     this.controls = elem.elements;
 
+    this.visible = elem.style.display !== 'none';
+
     this.attach_listeners();
 }
 extend(Menu.prototype, {
@@ -166,7 +168,11 @@ extend(Menu.prototype, {
             menu.dragging = false;
         });
     },
+    toggle: function(){
+        this.visible = !this.visible;
+    },
     render: function(){
+        this.elem.style.display = this.visible? '': 'none';
     },
     move: function(x, y){
         this.elem.style.left = px(x);
@@ -255,6 +261,14 @@ extend(SimulationRunner.prototype, {
                 runner.render()
             });
         }
+
+        this.elems.menu_toggle_sim.addEventListener('click', function(event){
+            var x = event.pageX;
+            var y = event.pageY;
+            runner.menus.sim.toggle();
+            runner.menus.sim.move(x, y);
+            runner.render();
+        });
     },
     drag_start: function(x, y, dragging){
         this.dragging = dragging;
