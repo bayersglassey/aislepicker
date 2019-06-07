@@ -1,11 +1,8 @@
-# AislePicker
+# AislePicker v0
 
 A tiny Javascript widget for playing with
 [the Vehicle Routing Problem](https://en.wikipedia.org/wiki/Vehicle_routing_problem),
 a.k.a. "VHP" for short.
-
-Might be up and running at
-[aislepicker.bayersglassey.com](http://aislepicker.bayersglassey.com).
 
 
 ## Vehicle Routing Problem
@@ -20,12 +17,16 @@ its nodes, or the cost of travelling from one to the other.
 each one, while minimizing the cost or "travel time".
 
 
-## Old versions
+## AislePicker's graph
 
-[AislePicker v0 README](/README-v0.md)
+AislePicker generates very specific kinds of graph,
+which model the aisles of a grocery store.
+The edge weights are calculated to simulate a shopper who can
+only travel back and forth along aisles, or up and down at the
+sides of the store to reach other aisles.
 
 
 ## Screenshot
 
-![](/screenshots/v1-alpha.png)
+![](/screenshots/v0-alpha.png)
 
