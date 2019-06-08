@@ -73,6 +73,8 @@ function deserialize(obj, text){
     obj.load_serializable_data(data);
 }
 
+var K_DELETE = 46;
+
 
 
 
@@ -102,6 +104,11 @@ extend(Node.prototype, {
             dst_node.add_edge(this, false);
         }
         return edge;
+    },
+    remove_edge: function(edge){
+        var i = this.edges.indexOf(edge);
+        if(i < 0)return;
+        this.edges.splice(i, 1);
     },
     get_serializable_data: function(){
         var edges_data = [];
@@ -144,6 +151,21 @@ extend(Simulation.prototype, {
         var node = new Node(id, x, y, radius, label);
         this.nodes.push(node);
         return node;
+    },
+    remove_node: function(node){
+        var i = this.nodes.indexOf(node);
+        if(i < 0)return;
+        this.nodes.splice(i, 1);
+
+        var dst_node = node;
+        for(var i = 0; i < this.nodes.length; i++){
+            var node = this.nodes[i];
+            for(var j = 0; j < node.edges.length; j++){
+                var edge = node.edges[j];
+                if(edge.dst_node !== dst_node)continue;
+                node.remove_edge(edge); j--;
+            }
+        }
     },
     get_node_xy: function(x, y){
         /* Iterate in reverse order so nodes with de facto "highest z order"
@@ -313,6 +335,19 @@ extend(SimulationRunner.prototype, {
             runner.render();
         });
 
+        document.addEventListener('keydown', function(event){
+            if(event.target === document.body){
+                if(event.keyCode === K_DELETE){
+                    if(event.shiftKey){
+                        runner.remove_selected_edges();
+                    }else{
+                        runner.remove_selected_nodes();
+                    }
+                    runner.render();
+                }
+            }
+        });
+
         for(var key in this.menus){
             if(!this.menus.hasOwnProperty(key))continue;
             this.menus[key].elem.addEventListener('change', function(event){
@@ -390,6 +425,22 @@ extend(SimulationRunner.prototype, {
         this.add_edges(node);
         this.selected_nodes = [node];
         return node;
+    },
+    remove_selected_nodes: function(){
+        for(var i = 0; i < this.selected_nodes.length; i++){
+            this.sim.remove_node(this.selected_nodes[i]);
+        }
+        this.clear_selected_nodes();
+    },
+    remove_selected_edges: function(){
+        for(var i = 0; i < this.selected_nodes.length; i++){
+            var node = this.selected_nodes[i];
+            for(var j = 0; j < node.edges.length; j++){
+                var edge = node.edges[j];
+                if(this.selected_nodes.indexOf(edge.dst_node) < 0)continue;
+                node.remove_edge(edge); j--;
+            }
+        }
     },
     clear_selected_nodes: function(){
         this.selected_nodes.length = 0;
