@@ -33,6 +33,9 @@ extend(Node.prototype, {
         if(i < 0)return;
         this.edges.splice(i, 1);
     },
+    get_dist2d: function(other_node){
+        return dist2d(this.x, this.y, other_node.x, other_node.y);
+    },
     get_serializable_data: function(){
         var edges_data = [];
         for(var i = 0; i < this.edges.length; i++){

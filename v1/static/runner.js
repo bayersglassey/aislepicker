@@ -2,7 +2,7 @@
 
 
 
-var MENU_NAMES = ['sim', 'picklists'];
+var MENU_NAMES = ['sim', 'graph', 'picklists'];
 
 
 
@@ -85,7 +85,6 @@ function SimulationRunner(elems){
 
     this.picklists = [];
     this.selected_picklist = null;
-    this.selected_picklist_item = null;
 
     this.attach_listeners();
     this.render();
@@ -171,6 +170,19 @@ extend(SimulationRunner.prototype, {
         this.menus.sim.controls.json_load.addEventListener('click', function(event){
             var text = runner.menus.sim.controls.json_text.value;
             deserialize(runner, text);
+            runner.render();
+        });
+
+        this.menus.graph.controls.node_label.addEventListener('change', function(event){
+            var node = runner.get_selected_node();
+            if(!node)return;
+            node.label = event.target.value;
+            runner.render();
+        });
+        this.menus.graph.controls.node_radius.addEventListener('change', function(event){
+            var node = runner.get_selected_node();
+            if(!node)return;
+            node.radius = parseInt(event.target.value) || 1;
             runner.render();
         });
 
@@ -306,6 +318,14 @@ extend(SimulationRunner.prototype, {
         if(this.selected_nodes.indexOf(node) >= 0)return;
         this.selected_nodes.push(node);
     },
+    get_selected_node: function(){
+        if(this.selected_nodes.length !== 1)return null;
+        return this.selected_nodes[0];
+    },
+    get_selected_nodepair: function(){
+        if(this.selected_nodes.length !== 2)return null;
+        return this.selected_nodes;
+    },
     add_picklist: function(title, nodes){
         var id = this.picklists.length;
         title = title || "Picklist-" + id;
@@ -399,6 +419,7 @@ extend(SimulationRunner.prototype, {
         this.render_edges();
         this.render_nodes();
         this.render_picklist();
+        this.render_node_labels();
         this.render_dragbox();
 
         for(var key in this.menus){
@@ -408,6 +429,23 @@ extend(SimulationRunner.prototype, {
 
         this.node_radius = parseInt(
             this.menus.sim.controls.node_radius.value);
+
+        var selected_node = this.get_selected_node();
+        showif(this.elems.menu_selected_node, selected_node);
+        if(selected_node){
+            var menu = this.menus.graph;
+            menu.controls.node_label.value = selected_node.label;
+            menu.controls.node_radius.value = selected_node.radius;
+        }
+
+        var selected_nodepair = this.get_selected_nodepair();
+        showif(this.elems.menu_selected_nodepair, selected_nodepair);
+        if(selected_nodepair){
+            var menu = this.menus.graph;
+            var node1 = selected_nodepair[0];
+            var node2 = selected_nodepair[1];
+            menu.controls.nodepair_dist.value = node1.get_dist2d(node2);
+        }
 
         var select = this.menus.picklists.controls.picklist;
         clear_options(select);
@@ -468,12 +506,36 @@ extend(SimulationRunner.prototype, {
             }else{
                 ctx.strokeStyle = '#000';
                 ctx.fillStyle = 'transparent';
+                if(node.label){
+                    ctx.strokeStyle = '#555';
+                }
             }
 
             ctx.beginPath();
             drawCircle(ctx, node.x, node.y, r);
             ctx.fill();
             ctx.stroke();
+        }
+    },
+    render_node_labels: function(){
+        var ctx = this.canvas.getContext('2d');
+        var nodes = this.sim.nodes;
+        for(var i = 0; i < nodes.length; i++){
+            var node = nodes[i];
+            if(node.label){
+                var is_selected = this.node_is_selected(node);
+                var text_h = 16;
+                var bold = false;
+                ctx.fillStyle = '#000';
+                if(is_selected){
+                    ctx.fillStyle = '#900';
+                    text_h = 18;
+                    bold = true;
+                }
+                ctx.font = font('serif', text_h, bold);
+                var text_w = ctx.measureText(node.label).width;
+                ctx.fillText(node.label, node.x - text_w / 2, node.y + text_h / 2);
+            }
         }
     },
     render_picklist: function(){

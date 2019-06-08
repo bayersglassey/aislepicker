@@ -61,6 +61,7 @@
         <form id="menu_controls">
             <p>
                 <button type="button" class="btn btn-primary" id="menu_toggle_sim">Toggle Simulation Menu</button>
+                <button type="button" class="btn btn-primary" id="menu_toggle_graph">Toggle Graph Menu</button>
                 <button type="button" class="btn btn-primary" id="menu_toggle_picklists">Toggle Picklists Menu</button>
             </p>
             <p>Tip: Once opened, menus can be moved by dragging them by the title.</p>
@@ -107,6 +108,34 @@
             </p>
         </form>
 
+        <form class="menu" id="menu_graph" style="display: none">
+            <h3 class="menu-header">Graph (Nodes &amp; Edges)</h3>
+            <p>
+                Tip: Select 1 node to see its details here.
+            </p>
+            <p>
+                Tip: Select 2 nodes to see details about the paths between them.
+            </p>
+            <div id="menu_selected_node">
+                <h3 class="menu-header">Selected Node</h3>
+                <p>
+                    <label for="node_label">Label</label>
+                    <input type="text" class="form-control" name="node_label">
+                </p>
+                <p>
+                    <label for="node_radius">Radius</label>
+                    <input type="text" class="form-control" name="node_radius">
+                </p>
+            </div>
+            <div id="menu_selected_nodepair">
+                <h3 class="menu-header">Selected Node Pair</h3>
+                <p>
+                    <label for="nodepair_dist">Distance</label>
+                    <input type="text" class="form-control" name="nodepair_dist">
+                </p>
+            </div>
+        </form>
+
         <form class="menu" id="menu_picklists" style="display: none">
             <h3 class="menu-header">Picklists</h3>
             <p>
@@ -151,9 +180,10 @@
         var elems = {};
         var elem_ids = [
             'loading', 'main', 'canvas',
-            'menu_sim', 'menu_toggle_sim', 'menu_toggle_picklists',
-            'menu_picklists', 'menu_selected_picklist',
-            'menu_selected_picklist_item',
+            'menu_sim', 'menu_graph', 'menu_picklists',
+            'menu_toggle_sim', 'menu_toggle_graph', 'menu_toggle_picklists',
+            'menu_selected_node', 'menu_selected_nodepair',
+            'menu_selected_picklist', 'menu_selected_picklist_item',
         ];
         for(var i = 0; i < elem_ids.length; i++){
             var elem_id = elem_ids[i];

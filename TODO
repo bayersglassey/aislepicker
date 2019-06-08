@@ -2,3 +2,17 @@
 * Mouse coords for canvas events are messed up when devtools is open (so... when window/canvas are squished?..)
 
 * Runner needs start/stop/restart, loading JSON should restart before deserializing
+
+* Need to be able to find shortest path between any two nodes!
+    So, depth-first search or whatever it's going to be.
+
+* Add a separate menu for picklist routing?.. it shows routes for selected picklist?..
+    Pickplan + Pickroutes
+    Pickschedule + Pickroutes
+    ummm
+
+    Keep in mind we want to be able to generate these automatically.
+    Specifying e.g. "3 pickers, each picker handles max weight 5".
+    Another approach would be to create pickers manually, and then
+    assign each picker a set of nodes they're allowed to pick from...
+    Representing store departments, basically.
