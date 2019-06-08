@@ -6,9 +6,12 @@
 ****************/
 
 function extend(obj0, obj1){
-    for(var key in obj1){
-        if(!obj1.hasOwnProperty(key))continue;
-        obj0[key] = obj1[key];
+    for(var i = 1; i < arguments.length; i++){
+        obj1 = arguments[i];
+        for(var key in obj1){
+            if(!obj1.hasOwnProperty(key))continue;
+            obj0[key] = obj1[key];
+        }
     }
     return obj0;
 }
@@ -60,6 +63,16 @@ function boxcoll(l0, r0, t0, b0, l1, r1, t1, b1){
     );
 }
 
+function serialize(obj){
+    var data = obj.get_serializable_data();
+    return JSON.stringify(data, null, 4);
+}
+
+function deserialize(obj, text){
+    var data = JSON.parse(text);
+    obj.load_serializable_data(data);
+}
+
 
 
 
@@ -90,12 +103,31 @@ extend(Node.prototype, {
         }
         return edge;
     },
+    get_serializable_data: function(){
+        var edges_data = [];
+        for(var i = 0; i < this.edges.length; i++){
+            var edge = this.edges[i];
+            edges_data.push(edge.get_serializable_data());
+        }
+        return {
+            x: this.x,
+            y: this.y,
+            radius: this.radius,
+            label: this.label,
+            edges: edges_data,
+        };
+    },
 });
 
 function Edge(dst_node){
     this.dst_node = dst_node;
 }
 extend(Edge.prototype, {
+    get_serializable_data: function(){
+        return {
+            dst_node: this.dst_node.id,
+        };
+    },
 });
 
 
@@ -105,13 +137,11 @@ extend(Edge.prototype, {
 
 function Simulation(){
     this.nodes = [];
-    this.node_radius = 0;
 }
 extend(Simulation.prototype, {
-    add_node: function(x, y){
+    add_node: function(x, y, radius, label){
         var id = this.nodes.length;
-        var radius = this.node_radius || 1;
-        var node = new Node(id, x, y, radius);
+        var node = new Node(id, x, y, radius, label);
         this.nodes.push(node);
         return node;
     },
@@ -124,6 +154,32 @@ extend(Simulation.prototype, {
             if(dist < node.radius)return node;
         }
         return null;
+    },
+    get_serializable_data: function(){
+        var nodes_data = [];
+        for(var i = 0; i < this.nodes.length; i++){
+            var node = this.nodes[i];
+            nodes_data.push(node.get_serializable_data());
+        }
+        return {
+            nodes: nodes_data,
+        };
+    },
+    load_serializable_data: function(data){
+        for(var i = 0; i < data.nodes.length; i++){
+            var node_data = data.nodes[i];
+            var node = this.add_node(node_data.x, node_data.y,
+                node_data.radius, node_data.label);
+        }
+        for(var i = 0; i < data.nodes.length; i++){
+            var node_data = data.nodes[i];
+            var node = this.nodes[i];
+            for(var j = 0; j < node_data.edges.length; j++){
+                var edge_data = node_data.edges[j];
+                var dst_node = this.nodes[edge_data.dst_node];
+                var edge = node.add_edge(dst_node, false);
+            }
+        }
     },
 });
 
@@ -198,6 +254,8 @@ function SimulationRunner(elems){
     this.selected_nodes = [];
     this.dragging = false;
 
+    this.node_radius = 8;
+
     this.attach_listeners();
     this.render();
 }
@@ -262,6 +320,16 @@ extend(SimulationRunner.prototype, {
             });
         }
 
+        this.menus.sim.controls.json_save.addEventListener('click', function(event){
+            var text = serialize(runner);
+            runner.menus.sim.controls.json_text.value = text;
+        });
+        this.menus.sim.controls.json_load.addEventListener('click', function(event){
+            var text = runner.menus.sim.controls.json_text.value;
+            deserialize(runner, text);
+            runner.render();
+        });
+
         this.elems.menu_toggle_sim.addEventListener('click', function(event){
             var x = event.pageX;
             var y = event.pageY;
@@ -318,7 +386,7 @@ extend(SimulationRunner.prototype, {
         }
     },
     add_node: function(x, y){
-        var node = this.sim.add_node(x, y);
+        var node = this.sim.add_node(x, y, this.node_radius);
         this.add_edges(node);
         this.selected_nodes = [node];
         return node;
@@ -335,6 +403,20 @@ extend(SimulationRunner.prototype, {
     },
     message: function(msg){
         alert(msg);
+    },
+    get_serializable_data: function(){
+        return {
+            title: this.menus.sim.controls.title.value,
+            bgimg: this.menus.sim.controls.bgimg.value,
+            node_radius: this.node_radius,
+            sim: this.sim.get_serializable_data(),
+        };
+    },
+    load_serializable_data: function(data){
+        this.menus.sim.controls.title.value = data.title;
+        this.menus.sim.controls.bgimg.value = data.bgimg;
+        this.menus.sim.controls.node_radius.value = data.node_radius;
+        this.sim.load_serializable_data(data.sim);
     },
     render: function(){
         hide(this.elems.loading);
@@ -353,7 +435,7 @@ extend(SimulationRunner.prototype, {
             this.menus[key].render();
         }
 
-        this.sim.node_radius = parseInt(
+        this.node_radius = parseInt(
             this.menus.sim.controls.node_radius.value);
     },
     render_clear: function(){

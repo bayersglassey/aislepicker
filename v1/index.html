@@ -39,9 +39,12 @@
         .menu {
             position: absolute;
             background: #eee;
-            border: solid 1px #ddd;
+            border: solid 1px #999;
             border-radius: 1em;
             padding: 1em;
+        }
+        .no-resize {
+            resize: none;
         }
     </style>
 </head>
@@ -57,15 +60,23 @@
             <h4>(This menu can be moved by dragging its title)</h4>
             <p>
                 <label for="title">Title</label>
-                <input type="text" name="title" value="New Simulation">
+                <input type="text" class="form-control" name="title" value="New Simulation">
             </p>
             <p>
                 <label for="bgimg">Background Image (Store Floor Plan)</label>
-                <input type="text" name="bgimg" value="/v1/static/img/default-floor-plan.png">
+                <input type="text" class="form-control" name="bgimg" value="/v1/static/img/default-floor-plan.png">
             </p>
             <p>
                 <label for="node_radius">Default Node Radius</label>
-                <input type="text" name="node_radius" value="8">
+                <input type="text" class="form-control" name="node_radius" value="8">
+            </p>
+            <p>
+                <label>Save/Load Simulation as JSON</label>
+                <textarea class="form-control no-resize" name="json_text" rows="7" cols="40"></textarea>
+            </p>
+            <p>
+                <button type="button" class="btn btn-primary" name="json_save">Save</button>
+                <button type="button" class="btn btn-primary" name="json_load">Load</button>
             </p>
         </form>
         <form id="menu_controls">
@@ -98,6 +109,7 @@
         var runner = new SimulationRunner(elems);
         var canvas = runner.canvas;
         var ctx = canvas.getContext('2d');
+        var sim = runner.sim;
     </script>
 </body>
 </html>
