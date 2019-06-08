@@ -2,6 +2,10 @@
 
 
 
+var MENU_NAMES = ['sim', 'picklists'];
+
+
+
 /*******
 * MENU *
 ********/
@@ -20,6 +24,9 @@ function Menu(elem){
 extend(Menu.prototype, {
     attach_listeners: function(){
         var menu = this;
+        this.elem.addEventListener('submit', function(event){
+            event.preventDefault();
+        });
         for(var i = 0; i < this.header_elems.length; i++){
             var header_elem = this.header_elems[i];
             header_elem.addEventListener('mousedown', function(event){
@@ -63,15 +70,22 @@ function SimulationRunner(elems){
     this.elems = elems;
     this.main = elems.main;
     this.canvas = elems.canvas;
-    this.menus = {
-        sim: new Menu(elems.menu_sim),
-    };
+
+    this.menus = {};
+    for(var i = 0; i < MENU_NAMES.length; i++){
+        var menu_name = MENU_NAMES[i];
+        this.menus[menu_name] = new Menu(elems['menu_' + menu_name]);
+    }
 
     this.sim = new Simulation();
     this.selected_nodes = [];
     this.dragging = false;
 
     this.node_radius = 8;
+
+    this.picklists = [];
+    this.selected_picklist = null;
+    this.selected_picklist_item = null;
 
     this.attach_listeners();
     this.render();
@@ -160,13 +174,58 @@ extend(SimulationRunner.prototype, {
             runner.render();
         });
 
-        this.elems.menu_toggle_sim.addEventListener('click', function(event){
-            var x = event.pageX;
-            var y = event.pageY;
-            runner.menus.sim.toggle();
-            runner.menus.sim.move(x, y);
+        this.menus.picklists.controls.picklist.addEventListener('change', function(event){
+            var i = parseInt(event.target.value);
+            runner.selected_picklist = isNaN(i)? null: runner.picklists[i];
             runner.render();
         });
+        this.menus.picklists.controls.title.addEventListener('change', function(event){
+            runner.selected_picklist.title = event.target.value;
+            runner.render();
+        });
+        this.menus.picklists.controls.create.addEventListener('click', function(event){
+            var picklist = runner.create_picklist();
+            runner.selected_picklist = picklist;
+            runner.render();
+        });
+        this.menus.picklists.controls.items_add.addEventListener('click', function(event){
+            runner.add_picklist_items();
+            runner.render();
+        });
+        this.menus.picklists.controls.items_remove.addEventListener('click', function(event){
+            runner.remove_picklist_items();
+            runner.render();
+        });
+        this.menus.picklists.controls.items_select.addEventListener('click', function(event){
+            runner.select_picklist_items();
+            runner.render();
+        });
+        this.menus.picklists.controls.item_label.addEventListener('change', function(event){
+            var item = runner.get_selected_picklist_item();
+            if(!item)return;
+            item.label = event.target.value;
+            runner.render();
+        });
+        this.menus.picklists.controls.item_weight.addEventListener('change', function(event){
+            var item = runner.get_selected_picklist_item();
+            if(!item)return;
+            item.weight = event.target.value;
+            runner.render();
+        });
+
+        for(var i = 0; i < MENU_NAMES.length; i++){
+            var menu_name = MENU_NAMES[i];
+            var toggle_btn = this.elems['menu_toggle_' + menu_name];
+            toggle_btn.menu_name = menu_name;
+            toggle_btn.addEventListener('click', function(event){
+                var menu_name = event.target.menu_name;
+                var x = event.pageX;
+                var y = event.pageY;
+                runner.menus[menu_name].toggle();
+                runner.menus[menu_name].move(x, y);
+                runner.render();
+            });
+        }
     },
     drag_start: function(x, y, dragging){
         this.dragging = dragging;
@@ -247,15 +306,71 @@ extend(SimulationRunner.prototype, {
         if(this.selected_nodes.indexOf(node) >= 0)return;
         this.selected_nodes.push(node);
     },
+    add_picklist: function(title, nodes){
+        var id = this.picklists.length;
+        title = title || "Picklist-" + id;
+        var picklist = new Picklist(id, title, nodes);
+        this.picklists.push(picklist);
+        return picklist;
+    },
+    create_picklist: function(){
+        return this.add_picklist(undefined, this.selected_nodes);
+    },
+    add_picklist_items: function(){
+        var picklist = this.selected_picklist;
+        if(!picklist)return;
+        for(var i = 0; i < this.selected_nodes.length; i++){
+            var node = this.selected_nodes[i];
+            picklist.add_item(node);
+        }
+    },
+    remove_picklist_items: function(){
+        var picklist = this.selected_picklist;
+        if(!picklist)return;
+        for(var i = 0; i < picklist.items.length; i++){
+            var item = picklist.items[i];
+            if(this.selected_nodes.indexOf(item.node) >= 0){
+                picklist.remove_item(item);
+                i--;
+            }
+        }
+    },
+    select_picklist_items: function(){
+        var picklist = this.selected_picklist;
+        if(!picklist)return;
+        this.clear_selected_nodes();
+        for(var i = 0; i < picklist.items.length; i++){
+            this.add_selected_node(picklist.items[i].node);
+        }
+    },
+    get_selected_picklist_item: function(){
+        var picklist = this.selected_picklist;
+        if(!picklist)return;
+        var selected_item = null;
+        for(var i = 0; i < picklist.items.length; i++){
+            var item = picklist.items[i];
+            if(this.selected_nodes.indexOf(item.node) >= 0){
+                if(selected_item)return null;
+                selected_item = item;
+            }
+        }
+        return selected_item;
+    },
     message: function(msg){
         alert(msg);
     },
     get_serializable_data: function(){
+        var picklists_data = [];
+        for(var i = 0; i < this.picklists.length; i++){
+            var picklist = this.picklists[i]
+            picklists_data.push(picklist.get_serializable_data());
+        }
         return {
             title: this.menus.sim.controls.title.value,
             bgimg: this.menus.sim.controls.bgimg.value,
             node_radius: this.node_radius,
             sim: this.sim.get_serializable_data(),
+            picklists: picklists_data,
         };
     },
     load_serializable_data: function(data){
@@ -263,6 +378,15 @@ extend(SimulationRunner.prototype, {
         this.menus.sim.controls.bgimg.value = data.bgimg;
         this.menus.sim.controls.node_radius.value = data.node_radius;
         this.sim.load_serializable_data(data.sim);
+        for(var i = 0; i < data.picklists.length; i++){
+            var picklist_data = data.picklists[i];
+            var picklist = this.add_picklist(picklist_data.title);
+            for(var j = 0; j < picklist_data.items.length; j++){
+                var item_data = picklist_data.items[j];
+                var node = this.sim.nodes[item_data.node];
+                picklist.add_item(node, item_data.weight, item_data.label);
+            }
+        }
     },
     render: function(){
         hide(this.elems.loading);
@@ -274,6 +398,7 @@ extend(SimulationRunner.prototype, {
         this.render_clear();
         this.render_edges();
         this.render_nodes();
+        this.render_picklist();
         this.render_dragbox();
 
         for(var key in this.menus){
@@ -283,6 +408,29 @@ extend(SimulationRunner.prototype, {
 
         this.node_radius = parseInt(
             this.menus.sim.controls.node_radius.value);
+
+        var select = this.menus.picklists.controls.picklist;
+        clear_options(select);
+        add_option(select, '', "<none>");
+        for(var i = 0; i < this.picklists.length; i++){
+            var picklist = this.picklists[i];
+            add_option(select, i, picklist.title);
+        }
+        select.value = this.selected_picklist? this.selected_picklist.id: '';
+
+        showif(this.elems.menu_selected_picklist, this.selected_picklist);
+        if(this.selected_picklist){
+            var menu = this.menus.picklists;
+            menu.controls.title.value = this.selected_picklist.title;
+        }
+
+        var selected_picklist_item = this.get_selected_picklist_item();
+        showif(this.elems.menu_selected_picklist_item, selected_picklist_item);
+        if(selected_picklist_item){
+            var menu = this.menus.picklists;
+            menu.controls.item_label.value = selected_picklist_item.label;
+            menu.controls.item_weight.value = selected_picklist_item.weight;
+        }
     },
     render_clear: function(){
         var ctx = this.canvas.getContext('2d');
@@ -296,6 +444,7 @@ extend(SimulationRunner.prototype, {
             for(var j = 0; j < node.edges.length; j++){
                 var edge = node.edges[j];
                 var dst_node = edge.dst_node;
+                ctx.lineWidth = 1;
                 ctx.strokeStyle = '#aaa';
                 ctx.beginPath();
                 ctx.moveTo(node.x, node.y);
@@ -312,6 +461,7 @@ extend(SimulationRunner.prototype, {
             var r = node.radius;
 
             var is_selected = this.node_is_selected(node);
+            ctx.lineWidth = 1;
             if(is_selected){
                 ctx.strokeStyle = '#f00';
                 ctx.fillStyle = '#f77';
@@ -326,6 +476,21 @@ extend(SimulationRunner.prototype, {
             ctx.stroke();
         }
     },
+    render_picklist: function(){
+        var picklist = this.selected_picklist;
+        if(!picklist)return;
+
+        var ctx = this.canvas.getContext('2d');
+
+        for(var i = 0; i < picklist.items.length; i++){
+            var item = picklist.items[i];
+            var node = item.node;
+            var rad = node.radius + 2;
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#00f';
+            ctx.strokeRect(node.x - rad, node.y - rad, rad * 2, rad * 2);
+        }
+    },
     render_dragbox: function(){
         if(this.dragging !== 'select')return;
 
@@ -338,6 +503,7 @@ extend(SimulationRunner.prototype, {
         ctx.save();
 
         ctx.globalAlpha = .5;
+        ctx.lineWidth = 1;
         ctx.strokeStyle = '#f00';
         ctx.strokeRect(x, y, w, h);
 

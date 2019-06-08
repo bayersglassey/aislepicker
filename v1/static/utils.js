@@ -63,6 +63,16 @@ function boxcoll(l0, r0, t0, b0, l1, r1, t1, b1){
     );
 }
 
+function clear_options(select){
+    while(select.options.length > 0)select.options.remove(0);
+}
+function add_option(select, value, title){
+    var option = document.createElement('option');
+    option.value = value;
+    option.textContent = title;
+    select.appendChild(option);
+}
+
 function serialize(obj){
     var data = obj.get_serializable_data();
     return JSON.stringify(data, null, 4);

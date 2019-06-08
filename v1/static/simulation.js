@@ -15,7 +15,7 @@ function Node(id, x, y, radius, label){
     this.y = y;
 
     this.radius = radius;
-    this.label = label? label: null;
+    this.label = label || null;
 
     this.edges = [];
 }
