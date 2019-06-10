@@ -71,25 +71,34 @@ function SimulationRunner(elems){
     this.main = elems.main;
     this.canvas = elems.canvas;
 
-    this.menus = {};
-    for(var i = 0; i < MENU_NAMES.length; i++){
-        var menu_name = MENU_NAMES[i];
-        this.menus[menu_name] = new Menu(elems['menu_' + menu_name]);
-    }
-
-    this.sim = new Simulation();
-    this.selected_nodes = [];
-    this.dragging = false;
-
-    this.node_radius = 8;
-
-    this.picklists = [];
-    this.selected_picklist = null;
-
-    this.attach_listeners();
-    this.render();
+    this.start();
 }
 extend(SimulationRunner.prototype, {
+    start: function(){
+        this.menus = {};
+        for(var i = 0; i < MENU_NAMES.length; i++){
+            var menu_name = MENU_NAMES[i];
+            var menu_elem = this.elems['menu_' + menu_name];
+            this.menus[menu_name] = new Menu(menu_elem);
+        }
+
+        this.sim = new Simulation();
+        this.selected_nodes = [];
+        this.dragging = false;
+
+        this.title = "New Simulation";
+        this.bgimg = "/v1/static/img/default-floor-plan.png";
+        this.node_radius = 8;
+
+        this.picklists = [];
+        this.selected_picklist = null;
+
+        this.attach_listeners();
+        this.render();
+    },
+    restart: function(){
+        this.start();
+    },
     attach_listeners: function(){
         var runner = this;
 
@@ -163,6 +172,18 @@ extend(SimulationRunner.prototype, {
             });
         }
 
+        this.menus.sim.controls.title.addEventListener('change', function(event){
+            runner.title = event.target.value;
+            runner.render();
+        });
+        this.menus.sim.controls.bgimg.addEventListener('change', function(event){
+            runner.bgimg = event.target.value;
+            runner.render();
+        });
+        this.menus.sim.controls.node_radius.addEventListener('change', function(event){
+            runner.node_radius = parseInt(event.target.value) || 1;
+            runner.render();
+        });
         this.menus.sim.controls.json_save.addEventListener('click', function(event){
             var text = serialize(runner);
             runner.menus.sim.controls.json_text.value = text;
@@ -386,17 +407,17 @@ extend(SimulationRunner.prototype, {
             picklists_data.push(picklist.get_serializable_data());
         }
         return {
-            title: this.menus.sim.controls.title.value,
-            bgimg: this.menus.sim.controls.bgimg.value,
+            title: this.title,
+            bgimg: this.bgimg,
             node_radius: this.node_radius,
             sim: this.sim.get_serializable_data(),
             picklists: picklists_data,
         };
     },
     load_serializable_data: function(data){
-        this.menus.sim.controls.title.value = data.title;
-        this.menus.sim.controls.bgimg.value = data.bgimg;
-        this.menus.sim.controls.node_radius.value = data.node_radius;
+        this.title = data.title;
+        this.bgimg = data.bgimg;
+        this.node_radius = data.node_radius;
         this.sim.load_serializable_data(data.sim);
         for(var i = 0; i < data.picklists.length; i++){
             var picklist_data = data.picklists[i];
@@ -412,8 +433,7 @@ extend(SimulationRunner.prototype, {
         hide(this.elems.loading);
         show(this.elems.main);
 
-        var bgimg = this.menus.sim.controls.bgimg.value;
-        this.canvas.style.backgroundImage = url(bgimg);
+        this.canvas.style.backgroundImage = url(this.bgimg);
 
         this.render_clear();
         this.render_edges();
@@ -422,13 +442,14 @@ extend(SimulationRunner.prototype, {
         this.render_node_labels();
         this.render_dragbox();
 
+        this.menus.sim.controls.title.value = this.title;
+        this.menus.sim.controls.bgimg.value = this.bgimg;
+        this.menus.sim.controls.node_radius.value = this.node_radius;
+
         for(var key in this.menus){
             if(!this.menus.hasOwnProperty(key))continue;
             this.menus[key].render();
         }
-
-        this.node_radius = parseInt(
-            this.menus.sim.controls.node_radius.value);
 
         var selected_node = this.get_selected_node();
         showif(this.elems.menu_selected_node, selected_node);
