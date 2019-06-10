@@ -370,8 +370,8 @@ DEFAULT_RUNNER_DATA.push({
                 ]
             },
             {
-                "x": 155.5,
-                "y": 244,
+                "x": 152.5,
+                "y": 255,
                 "radius": 8,
                 "label": null,
                 "edges": [
@@ -511,7 +511,41 @@ DEFAULT_RUNNER_DATA.push({
             }
         ]
     },
-    "picklists": []
+    "picklists": [
+        {
+            "title": "Orders of the Day",
+            "items": [
+                {
+                    "node": 1,
+                    "weight": 1,
+                    "label": null
+                },
+                {
+                    "node": 30,
+                    "weight": 1,
+                    "label": null
+                },
+                {
+                    "node": 10,
+                    "weight": 1,
+                    "label": null
+                },
+                {
+                    "node": 5,
+                    "weight": 1,
+                    "label": null
+                },
+                {
+                    "node": 28,
+                    "weight": 1,
+                    "label": null
+                },
+                {
+                    "node": 20,
+                    "weight": 1,
+                    "label": null
+                }
+            ]
+        }
+    ]
 });
-
-
