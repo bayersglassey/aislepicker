@@ -27,5 +27,5 @@ each one, while minimizing the cost or "travel time".
 
 ## Screenshot
 
-![](/screenshots/v1-alpha.png)
+![](/screenshots/v1-alpha-2.png)
 
