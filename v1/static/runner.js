@@ -262,6 +262,10 @@ extend(SimulationRunner.prototype, {
             runner.selected_picklist = picklist;
             runner.render();
         });
+        this.menus.picklists.controls.remove.addEventListener('click', function(event){
+            runner.remove_picklist(runner.selected_picklist);
+            runner.render();
+        });
         this.menus.picklists.controls.items_add.addEventListener('click', function(event){
             runner.add_picklist_items();
             runner.render();
@@ -440,6 +444,18 @@ extend(SimulationRunner.prototype, {
     },
     create_picklist: function(){
         return this.add_picklist(undefined, this.selected_nodes);
+    },
+    remove_picklist: function(picklist){
+        var i = this.picklists.indexOf(picklist);
+        if(i < 0)return;
+        this.picklists.splice(i, 1);
+        if(picklist === this.selected_picklist)this.selected_picklist = null;
+
+        /* Update picklist ids */
+        for(var i = 0; i < this.picklists.length; i++){
+            var picklist = this.picklists[i];
+            picklist.id = i;
+        }
     },
     add_picklist_items: function(){
         var picklist = this.selected_picklist;

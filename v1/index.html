@@ -156,13 +156,16 @@
         <form class="menu" id="menu_picklists" style="display: none">
             <h3 class="menu-header">Picklists</h3>
             <p>
-                <select class="form-control" name="picklist"></select>
+                <button type="button" class="btn btn-primary" name="create">Create New</button>
             </p>
             <p>
-                <button type="button" class="btn btn-primary" name="create">Create</button>
+                <select class="form-control" name="picklist"></select>
             </p>
             <div id="menu_selected_picklist">
                 <h3 class="menu-header">Selected Picklist</h3>
+                <p>
+                    <button type="button" class="btn btn-primary" name="remove">Remove</button>
+                </p>
                 <p>
                     <label for="title">Title</label>
                     <input type="text" class="form-control" name="title">
