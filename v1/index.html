@@ -8,6 +8,7 @@
     <title>AislePicker v1</title>
 
     <link rel="stylesheet" href="/shared/static/bootstrap-3.3.7-dist/css/bootstrap.min.css">
+    <script src="/v1/static/default_runner_data.js"></script>
     <script src="/v1/static/utils.js"></script>
     <script src="/v1/static/simulation.js"></script>
     <script src="/v1/static/picklists.js"></script>
@@ -105,6 +106,17 @@
             <p>
                 <button type="button" class="btn btn-primary" name="json_save">Save</button>
                 <button type="button" class="btn btn-primary" name="json_load">Load</button>
+            </p>
+            <p>
+                <label>Load Default Simulation</label>
+                <select class="form-control" name="json_default"></select>
+            </p>
+            <p>
+                <button type="button" class="btn btn-primary" name="json_default_load">Load Selected</button>
+                <button type="button" class="btn btn-primary" name="clear">Load Empty</button>
+            </p>
+            <p>
+                Load a predefined simulation, or Load Empty to start from scratch.
             </p>
         </form>
 

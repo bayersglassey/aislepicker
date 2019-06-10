@@ -71,16 +71,23 @@ function SimulationRunner(elems){
     this.main = elems.main;
     this.canvas = elems.canvas;
 
+    this.menus = {};
+    for(var i = 0; i < MENU_NAMES.length; i++){
+        var menu_name = MENU_NAMES[i];
+        var menu_elem = this.elems['menu_' + menu_name];
+        this.menus[menu_name] = new Menu(menu_elem);
+    }
+
+    this.attach_listeners();
     this.start();
+
+    var data = DEFAULT_RUNNER_DATA[0];
+    this.load_serializable_data(data);
+
+    this.render();
 }
 extend(SimulationRunner.prototype, {
     start: function(){
-        this.menus = {};
-        for(var i = 0; i < MENU_NAMES.length; i++){
-            var menu_name = MENU_NAMES[i];
-            var menu_elem = this.elems['menu_' + menu_name];
-            this.menus[menu_name] = new Menu(menu_elem);
-        }
 
         this.sim = new Simulation();
         this.selected_nodes = [];
@@ -93,8 +100,6 @@ extend(SimulationRunner.prototype, {
         this.picklists = [];
         this.selected_picklist = null;
 
-        this.attach_listeners();
-        this.render();
     },
     restart: function(){
         this.start();
@@ -184,13 +189,25 @@ extend(SimulationRunner.prototype, {
             runner.node_radius = parseInt(event.target.value) || 1;
             runner.render();
         });
+        this.menus.sim.controls.json_default_load.addEventListener('click', function(event){
+            var name = runner.menus.sim.controls.json_default.value;
+            var data = DEFAULT_RUNNER_DATA[name];
+            runner.restart();
+            runner.load_serializable_data(data);
+            runner.render();
+        });
         this.menus.sim.controls.json_save.addEventListener('click', function(event){
             var text = serialize(runner);
             runner.menus.sim.controls.json_text.value = text;
         });
         this.menus.sim.controls.json_load.addEventListener('click', function(event){
             var text = runner.menus.sim.controls.json_text.value;
+            runner.restart();
             deserialize(runner, text);
+            runner.render();
+        });
+        this.menus.sim.controls.clear.addEventListener('click', function(event){
+            runner.restart();
             runner.render();
         });
 
@@ -476,6 +493,13 @@ extend(SimulationRunner.prototype, {
             add_option(select, i, picklist.title);
         }
         select.value = this.selected_picklist? this.selected_picklist.id: '';
+
+        var select = this.menus.sim.controls.json_default;
+        clear_options(select);
+        for(var i = 0; i < DEFAULT_RUNNER_DATA.length; i++){
+            var data = DEFAULT_RUNNER_DATA[i];
+            add_option(select, i, data.title);
+        }
 
         showif(this.elems.menu_selected_picklist, this.selected_picklist);
         if(this.selected_picklist){
