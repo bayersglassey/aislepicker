@@ -23,15 +23,15 @@
             margin: auto;
             border: solid 1px #ddd;
         }
-        #instructions, #menu_controls {
-            max-width: 750px;
-            margin: auto;
-            border: solid 1px #ddd;
-        }
         #canvas {
             width: 100%;
             height: 100%;
             background-size: 100% 100%;
+        }
+        .section {
+            max-width: 750px;
+            margin: auto;
+            border: solid 1px #ddd;
         }
         .menu h3 {
             margin-top: 0;
@@ -59,7 +59,8 @@
         <div id="main" style="display: none">
             <canvas id="canvas" width="750" height="500">No canvas support!</canvas>
         </div>
-        <form id="menu_controls">
+        <p id="statusbar" class="section"></p>
+        <form id="menu_controls" class="section">
             <p>
                 <button type="button" class="btn btn-primary" id="menu_toggle_sim">Toggle Simulation Menu</button>
                 <button type="button" class="btn btn-primary" id="menu_toggle_graph">Toggle Graph Menu</button>
@@ -67,7 +68,7 @@
             </p>
             <p>Tip: Once opened, menus can be moved by dragging them by the title.</p>
         </form>
-        <div id="instructions">
+        <div id="instructions" class="section">
             <h3>Controls</h3>
             <ul>
                 <dt>Control + left-click</dt>
@@ -195,7 +196,7 @@
         'use strict';
         var elems = {};
         var elem_ids = [
-            'loading', 'main', 'canvas',
+            'loading', 'main', 'canvas', 'statusbar',
             'menu_sim', 'menu_graph', 'menu_picklists',
             'menu_toggle_sim', 'menu_toggle_graph', 'menu_toggle_picklists',
             'menu_selected_node', 'menu_selected_nodepair',

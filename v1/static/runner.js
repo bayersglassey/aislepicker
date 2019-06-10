@@ -70,6 +70,10 @@ function SimulationRunner(elems){
     this.elems = elems;
     this.main = elems.main;
     this.canvas = elems.canvas;
+    this.statusbar = elems.statusbar;
+
+    this.mx = 0;
+    this.my = 0;
 
     this.menus = {};
     for(var i = 0; i < MENU_NAMES.length; i++){
@@ -109,13 +113,24 @@ extend(SimulationRunner.prototype, {
     restart: function(){
         this.start();
     },
+    get_canvas_event_xy: function(event){
+        var target = event.target;
+        var rect = target.getBoundingClientRect();
+        var x = event.clientX - rect.left;
+        var y = event.clientY - rect.top;
+        x *= target.width / rect.width;
+        y *= target.height / rect.height;
+        x = Math.floor(x);
+        y = Math.floor(y);
+        return {x: x, y: y};
+    },
     attach_listeners: function(){
         var runner = this;
 
         this.canvas.addEventListener('mousedown', function(event){
-            var rect = event.target.getBoundingClientRect();
-            var x = event.clientX - rect.left;
-            var y = event.clientY - rect.top;
+            var xy = runner.get_canvas_event_xy(event);
+            var x = xy.x;
+            var y = xy.y;
             if(event.ctrlKey){
                 var node = runner.sim.get_node_xy(x, y);
                 if(node){
@@ -149,12 +164,16 @@ extend(SimulationRunner.prototype, {
             runner.render();
         });
         this.canvas.addEventListener('mousemove', function(event){
-            var rect = event.target.getBoundingClientRect();
-            var x = event.clientX - rect.left;
-            var y = event.clientY - rect.top;
+            var xy = runner.get_canvas_event_xy(event);
+            var x = xy.x;
+            var y = xy.y;
+            runner.mx = x;
+            runner.my = y;
             if(runner.dragging){
                 runner.drag_move(x, y);
                 runner.render();
+            }else{
+                runner.render_status();
             }
         });
         document.addEventListener('mouseup', function(event){
@@ -469,7 +488,6 @@ extend(SimulationRunner.prototype, {
 
         this.canvas.style.backgroundImage = url(this.bgimg);
 
-
         var selected_node = this.get_selected_node();
         var selected_nodepair = this.get_selected_nodepair();
         var selected_picklist_item = this.get_selected_picklist_item();
@@ -485,6 +503,7 @@ extend(SimulationRunner.prototype, {
         this.render_picklist();
         this.render_node_labels();
         this.render_dragbox();
+        this.render_status();
 
         this.menus.sim.controls.title.value = this.title;
         this.menus.sim.controls.bgimg.value = this.bgimg;
@@ -651,6 +670,17 @@ extend(SimulationRunner.prototype, {
         ctx.fillRect(x, y, w, h);
 
         ctx.restore();
+    },
+    render_status: function(){
+        var status = "";
+        status += "(" + this.canvas.width + " x " + this.canvas.height + ")";
+        status += ": " + this.mx + ", " + this.my;
+        if(this.dragging){
+            var dragging_w = Math.abs(this.dragging_x1 - this.dragging_x0);
+            var dragging_h = Math.abs(this.dragging_y1 - this.dragging_y0);
+            status += " [" + dragging_w + " x " + dragging_h + "]";
+        }
+        this.statusbar.textContent = status;
     },
 });
 

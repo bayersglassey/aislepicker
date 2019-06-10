@@ -1,6 +1,4 @@
 
-* Mouse coords for canvas events are messed up when devtools is open (so... when window/canvas are squished?..)
-
 * Add a separate menu for picklist routing?.. it shows routes for selected picklist?..
     Pickplan + Pickroutes
     Pickschedule + Pickroutes
