@@ -127,7 +127,7 @@ extend(SimulationRunner.prototype, {
                 var node = runner.sim.get_node_xy(x, y);
                 if(node){
                     if(event.shiftKey){
-                        runner.add_selected_node(node);
+                        runner.toggle_selected_node(node);
                     }else{
                         if(runner.node_is_selected(node)){
                             runner.drag_start(x, y, 'move');
@@ -360,6 +360,18 @@ extend(SimulationRunner.prototype, {
     add_selected_node: function(node){
         if(this.selected_nodes.indexOf(node) >= 0)return;
         this.selected_nodes.push(node);
+    },
+    remove_selected_node: function(node){
+        var i = this.selected_nodes.indexOf(node);
+        if(i < 0)return;
+        this.selected_nodes.splice(i, 1);
+    },
+    toggle_selected_node: function(node){
+        if(this.selected_nodes.indexOf(node) >= 0){
+            this.remove_selected_node(node);
+        }else{
+            this.add_selected_node(node);
+        }
     },
     get_selected_node: function(){
         if(this.selected_nodes.length !== 1)return null;
