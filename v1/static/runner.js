@@ -444,7 +444,7 @@ extend(SimulationRunner.prototype, {
             var menu = this.menus.graph;
             var node1 = selected_nodepair[0];
             var node2 = selected_nodepair[1];
-            menu.controls.nodepair_dist.value = node1.get_dist2d(node2);
+            menu.controls.nodepair_dist.value = node1.get_dist(node2);
         }
 
         var select = this.menus.picklists.controls.picklist;
