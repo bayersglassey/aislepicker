@@ -238,6 +238,9 @@ DEFAULT_RUNNER_DATA.push({
                     },
                     {
                         "dst_node": 20
+                    },
+                    {
+                        "dst_node": 31
                     }
                 ]
             },
@@ -466,8 +469,49 @@ DEFAULT_RUNNER_DATA.push({
                         "dst_node": 17
                     }
                 ]
+            },
+            {
+                "x": 596.5,
+                "y": 291,
+                "radius": 8,
+                "label": null,
+                "edges": [
+                    {
+                        "dst_node": 30
+                    },
+                    {
+                        "dst_node": 31
+                    }
+                ]
+            },
+            {
+                "x": 602.5,
+                "y": 119,
+                "radius": 12,
+                "label": "Picking Station",
+                "edges": [
+                    {
+                        "dst_node": 29
+                    }
+                ]
+            },
+            {
+                "x": 574.5,
+                "y": 324,
+                "radius": 8,
+                "label": null,
+                "edges": [
+                    {
+                        "dst_node": 29
+                    },
+                    {
+                        "dst_node": 14
+                    }
+                ]
             }
         ]
     },
     "picklists": []
 });
+
+
