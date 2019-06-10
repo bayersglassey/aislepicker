@@ -6,7 +6,8 @@
 * PICKLIST *
 ***********/
 
-function PicklistItem(node, weight, label){
+function PicklistItem(id, node, weight, label){
+    this.id = id;
     this.node = node;
     this.weight = weight || 1;
     this.label = label || null;
@@ -38,7 +39,8 @@ extend(Picklist.prototype, {
             var item = this.items[i];
             if(this.items[i].node === node)return;
         }
-        var item = new PicklistItem(node, weight, label);
+        var id = this.items.length;
+        var item = new PicklistItem(id, node, weight, label);
         this.items.push(item);
         return item;
     },

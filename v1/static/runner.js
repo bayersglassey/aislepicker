@@ -354,9 +354,40 @@ extend(SimulationRunner.prototype, {
         this.selected_nodes = [node];
         return node;
     },
+    remove_node: function(node){
+        var used_by_items = [];
+        for(var i = 0; i < this.picklists.length; i++){
+            var picklist = this.picklists[i];
+            for(var j = 0; j < picklist.items.length; j++){
+                var item = picklist.items[j];
+                if(item.node === node){
+                    used_by_items.push(
+                        {picklist: picklist, item: item});
+                }
+            }
+        }
+        if(used_by_items.length > 0){
+            var node_msg = "node " + node.id;
+            if(node.label)node_msg += " (" + node.label + ")";
+            var msg =
+                "Can't remove " + node_msg +
+                " because it's referred to by picklist items:";
+            for(var i = 0; i < used_by_items.length; i++){
+                var item_data = used_by_items[i];
+                var picklist = item_data.picklist;
+                var item = item_data.item;
+                var item_msg = picklist.title + " - Item " + item.id;
+                if(item.label)item_msg += " (" + item.label + ")";
+                msg += '\n' + item_msg;
+            }
+            this.message(msg);
+            return;
+        }
+        this.sim.remove_node(node);
+    },
     remove_selected_nodes: function(){
         for(var i = 0; i < this.selected_nodes.length; i++){
-            this.sim.remove_node(this.selected_nodes[i]);
+            this.remove_node(this.selected_nodes[i]);
         }
         this.clear_selected_nodes();
     },

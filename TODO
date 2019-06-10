@@ -1,4 +1,12 @@
 
+* If a node is used by a picklist item, and you remove the node from the graph,
+    the picklist item still holds onto it.
+    How do we handle this?
+    Do we remove the picklist item?
+    Do we remove the picklist?
+    Do we disallow deletion of the node and show an error message?
+        -> THIS
+
 * Add a separate menu for picklist routing?.. it shows routes for selected picklist?..
     Pickplan + Pickroutes
     Pickschedule + Pickroutes
