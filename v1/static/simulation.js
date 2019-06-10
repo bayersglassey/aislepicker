@@ -21,6 +21,7 @@ function Node(id, x, y, radius, label){
 }
 extend(Node.prototype, {
     add_edge: function(dst_node, twoway){
+        if(typeof twoway === 'undefined')twoway = true;
         var edge = new Edge(dst_node);
         this.edges.push(edge);
         if(twoway){
