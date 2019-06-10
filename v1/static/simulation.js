@@ -101,6 +101,11 @@ extend(Simulation.prototype, {
         var dst_node = node;
         for(var i = 0; i < this.nodes.length; i++){
             var node = this.nodes[i];
+
+            /* Update node ids */
+            node.id = i;
+
+            /* Remove edges pointing to deleted node */
             for(var j = 0; j < node.edges.length; j++){
                 var edge = node.edges[j];
                 if(edge.dst_node !== dst_node)continue;
