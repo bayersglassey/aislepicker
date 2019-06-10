@@ -78,6 +78,13 @@ function SimulationRunner(elems){
         this.menus[menu_name] = new Menu(menu_elem);
     }
 
+    var select = this.menus.sim.controls.json_default;
+    clear_options(select);
+    for(var i = 0; i < DEFAULT_RUNNER_DATA.length; i++){
+        var data = DEFAULT_RUNNER_DATA[i];
+        add_option(select, i, data.title);
+    }
+
     this.attach_listeners();
     this.start();
 
@@ -88,7 +95,6 @@ function SimulationRunner(elems){
 }
 extend(SimulationRunner.prototype, {
     start: function(){
-
         this.sim = new Simulation();
         this.selected_nodes = [];
         this.dragging = false;
@@ -99,7 +105,6 @@ extend(SimulationRunner.prototype, {
 
         this.picklists = [];
         this.selected_picklist = null;
-
     },
     restart: function(){
         this.start();
@@ -452,8 +457,18 @@ extend(SimulationRunner.prototype, {
 
         this.canvas.style.backgroundImage = url(this.bgimg);
 
+
+        var selected_node = this.get_selected_node();
+        var selected_nodepair = this.get_selected_nodepair();
+        var selected_picklist_item = this.get_selected_picklist_item();
+
+        var selected_path = selected_nodepair?
+            this.sim.get_shortest_path(
+                selected_nodepair[0], selected_nodepair[1]): null;
+
         this.render_clear();
         this.render_edges();
+        if(selected_path)this.render_path(selected_path);
         this.render_nodes();
         this.render_picklist();
         this.render_node_labels();
@@ -468,7 +483,6 @@ extend(SimulationRunner.prototype, {
             this.menus[key].render();
         }
 
-        var selected_node = this.get_selected_node();
         showif(this.elems.menu_selected_node, selected_node);
         if(selected_node){
             var menu = this.menus.graph;
@@ -476,13 +490,13 @@ extend(SimulationRunner.prototype, {
             menu.controls.node_radius.value = selected_node.radius;
         }
 
-        var selected_nodepair = this.get_selected_nodepair();
         showif(this.elems.menu_selected_nodepair, selected_nodepair);
         if(selected_nodepair){
             var menu = this.menus.graph;
             var node1 = selected_nodepair[0];
             var node2 = selected_nodepair[1];
             menu.controls.nodepair_dist.value = node1.get_dist(node2);
+            menu.controls.nodepair_path_dist.value = selected_path.dist;
         }
 
         var select = this.menus.picklists.controls.picklist;
@@ -494,20 +508,12 @@ extend(SimulationRunner.prototype, {
         }
         select.value = this.selected_picklist? this.selected_picklist.id: '';
 
-        var select = this.menus.sim.controls.json_default;
-        clear_options(select);
-        for(var i = 0; i < DEFAULT_RUNNER_DATA.length; i++){
-            var data = DEFAULT_RUNNER_DATA[i];
-            add_option(select, i, data.title);
-        }
-
         showif(this.elems.menu_selected_picklist, this.selected_picklist);
         if(this.selected_picklist){
             var menu = this.menus.picklists;
             menu.controls.title.value = this.selected_picklist.title;
         }
 
-        var selected_picklist_item = this.get_selected_picklist_item();
         showif(this.elems.menu_selected_picklist_item, selected_picklist_item);
         if(selected_picklist_item){
             var menu = this.menus.picklists;
@@ -518,6 +524,11 @@ extend(SimulationRunner.prototype, {
     render_clear: function(){
         var ctx = this.canvas.getContext('2d');
         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    },
+    render_nodepair_line: function(node, dst_node){
+        var ctx = this.canvas.getContext('2d');
+        ctx.moveTo(node.x, node.y);
+        ctx.lineTo(dst_node.x, dst_node.y);
     },
     render_edges: function(){
         var ctx = this.canvas.getContext('2d');
@@ -530,10 +541,19 @@ extend(SimulationRunner.prototype, {
                 ctx.lineWidth = 1;
                 ctx.strokeStyle = '#aaa';
                 ctx.beginPath();
-                ctx.moveTo(node.x, node.y);
-                ctx.lineTo(dst_node.x, dst_node.y);
+                this.render_nodepair_line(node, dst_node);
                 ctx.stroke();
             }
+        }
+    },
+    render_path: function(path){
+        var nodes = path.nodes;
+        for(var i = 1; i < nodes.length; i++){
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#0a3';
+            ctx.beginPath();
+            this.render_nodepair_line(nodes[i-1], nodes[i]);
+            ctx.stroke();
         }
     },
     render_nodes: function(){

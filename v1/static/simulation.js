@@ -64,6 +64,20 @@ extend(Edge.prototype, {
     },
 });
 
+function Path(nodes, dist){
+    this.nodes = nodes;
+    this.dist = typeof dist !== 'undefined'? dist: this.get_dist();
+}
+extend(Path.prototype, {
+    get_dist: function(){
+        var dist = 0;
+        for(var i = 1; i < nodes.length; i++){
+            dist += nodes[i-1].get_dist(nodes[i]);
+        }
+        return dist;
+    },
+});
+
 
 /*************
 * SIMULATION *
@@ -103,6 +117,76 @@ extend(Simulation.prototype, {
             if(dist < node.radius)return node;
         }
         return null;
+    },
+    get_shortest_path: function(node0, node1, d){
+        if(typeof d === 'undefined')d = this.get_djikstra(node0);
+
+        var nodes = [];
+        var node = node1;
+        while(node){
+            nodes.unshift(node);
+            node = d.prev_nodes_by_id[node.id];
+        }
+
+        var dist = d.dists_by_id[node1.id];
+        return new Path(nodes, dist);
+    },
+    get_djikstra: function(node0, nodes){
+        /* Djikstra's algorithm */
+
+        if(typeof nodes === 'undefined')nodes = this.nodes;
+        var unvisited_nodes = nodes.slice();
+
+        /* Array mapping node ids to shortest known distance from node0 */
+        var dists_by_id = new Array(nodes.length);
+
+        /* Array mapping node ids to previous node in shortest path */
+        var prev_nodes_by_id = new Array(nodes.length);
+
+        /* Initialize */
+        for(var i = 0; i < nodes.length; i++){
+            dists_by_id[i] = Infinity;
+            prev_nodes_by_id[i] = null;
+        }
+        dists_by_id[node0.id] = 0;
+
+        while(unvisited_nodes.length > 0){
+            /* Find unvisited node with smallest dist */
+            var node = null;
+            var node_dist = Infinity;
+            for(var i = 0; i < unvisited_nodes.length; i++){
+                var unvisited_node = unvisited_nodes[i];
+                var unvisited_node_dist = dists_by_id[unvisited_node.id];
+                if(unvisited_node_dist < node_dist){
+                    node = unvisited_node;
+                    node_dist = unvisited_node_dist;
+                }
+            }
+            if(!node){
+                console.log("Couldn't find next node!",
+                    unvisited_nodes, dists_by_id, prev_nodes_by_id);
+                break;
+            }
+
+            /* Remove node from unvisited_nodes */
+            unvisited_nodes.splice(unvisited_nodes.indexOf(node), 1);
+
+            for(var i = 0; i < node.edges.length; i++){
+                var edge = node.edges[i];
+                var dst_node = edge.dst_node;
+                if(unvisited_nodes.indexOf(dst_node) < 0)continue;
+                var dst_node_dist = node_dist + node.get_dist(dst_node);
+                if(dst_node_dist < dists_by_id[dst_node.id]){
+                    dists_by_id[dst_node.id] = dst_node_dist;
+                    prev_nodes_by_id[dst_node.id] = node;
+                }
+            }
+        }
+
+        return {
+            dists_by_id: dists_by_id,
+            prev_nodes_by_id: prev_nodes_by_id,
+        };
     },
     get_serializable_data: function(){
         var nodes_data = [];
