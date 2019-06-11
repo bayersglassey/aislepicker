@@ -23,11 +23,12 @@ extend(PicklistItem.prototype, {
 });
 
 
-function Picklist(id, title, sim, nodes){
+function Picklist(id, title, sim, nodes, loop){
     this.id = id;
     this.title = title;
     this.sim = sim;
     this.items = [];
+    this.loop = typeof loop === 'undefined'? true: false;
     if(nodes){
         for(var i = 0; i < nodes.length; i++){
             this.add_item(nodes[i]);
@@ -49,6 +50,33 @@ extend(Picklist.prototype, {
         var i = this.items.indexOf(item);
         if(i < 0)return;
         this.items.splice(i, 1);
+
+        /* Update item ids */
+        for(var i = 0; i < this.items.length; i++){
+            this.items[i].id = i;
+        }
+    },
+    get_start_item: function(){
+        if(this.items.length === 0)return null;
+        return this.items[0];
+    },
+    get_end_item: function(){
+        if(this.loop)return this.get_start_item();
+        if(this.items.length === 0)return null;
+        return this.items[this.items.length - 1];
+    },
+    set_start_item: function(item){
+        if(!item)return;
+        this.remove_item(item);
+        this.items.unshift(item);
+        item.id = 0;
+    },
+    set_end_item: function(item){
+        if(this.loop)return this.set_start(item);
+        if(!item)return;
+        this.remove_item(item);
+        this.items.push(item);
+        item.id = this.items.length - 1;
     },
     get_serializable_data: function(){
         var items_data = [];
@@ -58,6 +86,7 @@ extend(Picklist.prototype, {
         }
         return {
             title: this.title,
+            loop: this.loop,
             items: items_data,
         };
     },
@@ -119,11 +148,23 @@ extend(Picklist.prototype, {
     get_random_route: function(shortest_paths){
         var unused_items = this.items.slice();
         var route_items = [];
+
+        var start_item = unused_items.length > 0?
+            unused_items.shift(): null;
+        var end_item = !this.loop && unused_items.length > 0?
+            unused_items.pop(): start_item;
+
+        /* Start item should remain at start */
+        if(start_item)route_items.push(start_item);
+
         while(unused_items.length > 0){
             var item_id = Math.floor(Math.random() * unused_items.length);
             var item = unused_items.splice(item_id, 1)[0];
             route_items.push(item);
         }
+
+        /* End item should remain at end */
+        if(end_item)route_items.push(end_item);
 
         var route_paths = this.get_route_paths(route_items, shortest_paths);
         return new Route(route_items, route_paths);

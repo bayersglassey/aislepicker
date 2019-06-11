@@ -528,6 +528,7 @@ DEFAULT_RUNNER_DATA.push({
     "picklists": [
         {
             "title": "Orders of the Day",
+            "loop": false,
             "items": [
                 {
                     "node": 30,

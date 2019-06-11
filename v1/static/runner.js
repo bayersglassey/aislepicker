@@ -257,6 +257,10 @@ extend(SimulationRunner.prototype, {
             runner.selected_picklist.title = event.target.value;
             runner.render();
         });
+        this.menus.picklists.controls.loop.addEventListener('change', function(event){
+            runner.selected_picklist.loop = event.target.checked;
+            runner.render();
+        });
         this.menus.picklists.controls.create.addEventListener('click', function(event){
             var picklist = runner.create_picklist();
             runner.selected_picklist = picklist;
@@ -288,6 +292,16 @@ extend(SimulationRunner.prototype, {
             var item = runner.get_selected_picklist_item();
             if(!item)return;
             item.weight = event.target.value;
+            runner.render();
+        });
+        this.menus.picklists.controls.item_set_start.addEventListener('click', function(event){
+            if(!runner.selected_picklist)return;
+            runner.selected_picklist.set_start_item(runner.get_selected_picklist_item());
+            runner.render();
+        });
+        this.menus.picklists.controls.item_set_end.addEventListener('click', function(event){
+            if(!runner.selected_picklist)return;
+            runner.selected_picklist.set_end_item(runner.get_selected_picklist_item());
             runner.render();
         });
 
@@ -522,6 +536,7 @@ extend(SimulationRunner.prototype, {
         for(var i = 0; i < data.picklists.length; i++){
             var picklist_data = data.picklists[i];
             var picklist = this.add_picklist(picklist_data.title);
+            picklist.loop = picklist_data.loop;
             for(var j = 0; j < picklist_data.items.length; j++){
                 var item_data = picklist_data.items[j];
                 var node = this.sim.nodes[item_data.node];
@@ -540,12 +555,17 @@ extend(SimulationRunner.prototype, {
         var selected_picklist_item = this.get_selected_picklist_item();
 
         var selected_path = null;
-        if(selected_nodepair){
-            selected_path = this.sim.get_shortest_path(
-                selected_nodepair[0], selected_nodepair[1]);
-        }else if(this.selected_picklist){
+        var nodepair_path = null;
+        var picklist_route_path = null;
+        if(this.selected_picklist){
             var route = this.selected_picklist.get_best_route();
-            selected_path = route.get_path();
+            picklist_route_path = route.get_path();
+            selected_path = picklist_route_path;
+        }
+        if(selected_nodepair){
+            nodepair_path = this.sim.get_shortest_path(
+                selected_nodepair[0], selected_nodepair[1]);
+            selected_path = nodepair_path;
         }
 
         this.render_clear();
@@ -596,6 +616,9 @@ extend(SimulationRunner.prototype, {
         if(this.selected_picklist){
             var menu = this.menus.picklists;
             menu.controls.title.value = this.selected_picklist.title;
+            menu.controls.route_dist.value = selected_path? selected_path.dist: "<none>";
+            menu.controls.loop.value = this.selected_picklist.loop;
+            showif(menu.controls.item_set_end, !this.selected_picklist.loop);
         }
 
         showif(this.elems.menu_selected_picklist_item, selected_picklist_item);
@@ -712,13 +735,16 @@ extend(SimulationRunner.prototype, {
 
         var ctx = this.canvas.getContext('2d');
 
+        var start_item = picklist.get_start_item();
+        var end_item = picklist.get_end_item();
+
         for(var i = 0; i < picklist.items.length; i++){
             var item = picklist.items[i];
             var node = item.node;
 
             var label_parts = [];
-            if(i === 0)label_parts.push("START");
-            if(i === picklist.items.length - 1)label_parts.push("END");
+            if(item === start_item)label_parts.push("START");
+            if(item === end_item)label_parts.push("END");
             if(item.label)label_parts.push(item.label);
             var label = label_parts.join(': ');
 
@@ -726,7 +752,7 @@ extend(SimulationRunner.prototype, {
             var text_h = 16;
             var bold = false;
             ctx.fillStyle = '#09f';
-            if(i === 0 || i === picklist.items.length - 1){
+            if(item === start_item || item === end_item){
                 text_h += 2;
                 bold = true;
             }

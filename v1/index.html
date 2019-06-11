@@ -171,6 +171,16 @@
                     <input type="text" class="form-control" name="title">
                 </p>
                 <p>
+                    <label for="route_dist">Shortest Route (Estimated)</label>
+                    <input type="text" class="form-control" name="route_dist">
+                </p>
+                <p>
+                    <label for="loop">
+                        <input type="checkbox" name="loop">
+                        Loop (the start item is also the end item)
+                    </label>
+                </p>
+                <p>
                     <button type="button" class="btn btn-primary" name="items_add">Add Items</button>
                     <button type="button" class="btn btn-primary" name="items_remove">Remove Items</button>
                     <button type="button" class="btn btn-primary" name="items_select">Select Items' Nodes</button>
@@ -191,6 +201,14 @@
                 <p>
                     <label for="item_weight">Weight</label>
                     <input type="text" class="form-control" name="item_weight">
+                </p>
+                <p>
+                    <button type="button" class="btn btn-primary" name="item_set_start">Set as Start</button>
+                    <button type="button" class="btn btn-primary" name="item_set_end">Set as End</button>
+                </p>
+                <p>
+                    Tip: The start and end items of a picklist determine the
+                    start and end nodes of routes generated for that picklist.
                 </p>
             </div>
         </form>
