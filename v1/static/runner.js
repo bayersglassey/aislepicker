@@ -4,6 +4,8 @@
 
 var MENU_NAMES = ['sim', 'graph', 'picklists'];
 
+var AISLEPICKER_DO_BEZIER = true;
+
 
 
 /*******
@@ -632,10 +634,36 @@ extend(SimulationRunner.prototype, {
         var ctx = this.canvas.getContext('2d');
         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     },
-    render_nodepair_line: function(node, dst_node){
+    render_nodepair_line: function(node0, node1, handle0, handle1){
         var ctx = this.canvas.getContext('2d');
-        ctx.moveTo(node.x, node.y);
-        ctx.lineTo(dst_node.x, dst_node.y);
+        var x0 = node0.x;
+        var y0 = node0.y;
+        var x1 = node1.x;
+        var y1 = node1.y;
+        if(AISLEPICKER_DO_BEZIER && handle0 || handle1){
+            var hx0 = x0;
+            var hy0 = y0;
+            var hx1 = x1;
+            var hy1 = y1;
+
+            /* Something about my homerolled bezier handle calculations
+            here is wonky, but with small values of mul it looks ok */
+            var mul = .25;
+            if(handle0){
+                hx0 += (x0 - (x0 + handle0.x) / 2) * mul;
+                hy0 += (y0 - (y0 + handle0.y) / 2) * mul;
+            }
+            if(handle1){
+                hx1 += (x1 - (x1 + handle1.x) / 2) * mul;
+                hy1 += (y1 - (y1 + handle1.y) / 2) * mul;
+            }
+
+            ctx.moveTo(x0, y0);
+            ctx.bezierCurveTo(hx0, hy0, hx1, hy1, x1, y1);
+        }else{
+            ctx.moveTo(x0, y0);
+            ctx.lineTo(x1, y1);
+        }
     },
     render_edges: function(){
         var ctx = this.canvas.getContext('2d');
@@ -656,10 +684,14 @@ extend(SimulationRunner.prototype, {
     render_path: function(path){
         var nodes = path.nodes;
         for(var i = 1; i < nodes.length; i++){
+            var node0 = nodes[i - 1];
+            var node1 = nodes[i];
+            var handle0 = i >= 2? nodes[i - 2]: null;
+            var handle1 = i < nodes.length - 1? nodes[i + 1]: null;
             ctx.lineWidth = 2;
             ctx.strokeStyle = '#0a3';
             ctx.beginPath();
-            this.render_nodepair_line(nodes[i-1], nodes[i]);
+            this.render_nodepair_line(node0, node1, handle0, handle1);
             ctx.stroke();
         }
     },
