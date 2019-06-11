@@ -7,13 +7,6 @@
     Do we disallow deletion of the node and show an error message?
         -> THIS
 
-* Add a separate menu for picklist routing?.. it shows routes for selected picklist?..
-    Pickplan + Pickroutes
-    Pickschedule + Pickroutes
-    ummm
-
-    Keep in mind we want to be able to generate these automatically.
-    Specifying e.g. "3 pickers, each picker handles max weight 5".
-    Another approach would be to create pickers manually, and then
-    assign each picker a set of nodes they're allowed to pick from...
-    Representing store departments, basically.
+* Store X: node labels should be aisles e.g. A1-S2-B4,
+    picklist item labels should be products e.g. Pizza, Meat, etc.
+    Picklist item labels should be rendered above/below node labels.

@@ -65,16 +65,20 @@ extend(Edge.prototype, {
 });
 
 function Path(nodes, dist){
-    this.nodes = nodes;
+    this.nodes = nodes? nodes: [];
     this.dist = typeof dist !== 'undefined'? dist: this.get_dist();
 }
 extend(Path.prototype, {
     get_dist: function(){
         var dist = 0;
-        for(var i = 1; i < nodes.length; i++){
-            dist += nodes[i-1].get_dist(nodes[i]);
+        for(var i = 1; i < this.nodes.length; i++){
+            dist += this.nodes[i-1].get_dist(this.nodes[i]);
         }
         return dist;
+    },
+    concat: function(other_path){
+        this.nodes = this.nodes.concat(other_path.nodes);
+        this.dist += other_path.dist;
     },
 });
 

@@ -438,7 +438,7 @@ extend(SimulationRunner.prototype, {
     add_picklist: function(title, nodes){
         var id = this.picklists.length;
         title = title || "Picklist-" + id;
-        var picklist = new Picklist(id, title, nodes);
+        var picklist = new Picklist(id, title, this.sim, nodes);
         this.picklists.push(picklist);
         return picklist;
     },
@@ -539,9 +539,14 @@ extend(SimulationRunner.prototype, {
         var selected_nodepair = this.get_selected_nodepair();
         var selected_picklist_item = this.get_selected_picklist_item();
 
-        var selected_path = selected_nodepair?
-            this.sim.get_shortest_path(
-                selected_nodepair[0], selected_nodepair[1]): null;
+        var selected_path = null;
+        if(selected_nodepair){
+            selected_path = this.sim.get_shortest_path(
+                selected_nodepair[0], selected_nodepair[1]);
+        }else if(this.selected_picklist){
+            var route = this.selected_picklist.get_best_route();
+            selected_path = route.get_path();
+        }
 
         this.render_clear();
         this.render_edges();
@@ -549,6 +554,7 @@ extend(SimulationRunner.prototype, {
         this.render_nodes();
         this.render_picklist();
         this.render_node_labels();
+        this.render_picklist_labels();
         this.render_dragbox();
         this.render_status();
 
@@ -672,7 +678,7 @@ extend(SimulationRunner.prototype, {
                 ctx.fillStyle = '#000';
                 if(is_selected){
                     ctx.fillStyle = '#900';
-                    text_h = 18;
+                    text_h += 2;
                     bold = true;
                 }
                 ctx.font = font('serif', text_h, bold);
@@ -693,7 +699,46 @@ extend(SimulationRunner.prototype, {
             var rad = node.radius + 2;
             ctx.lineWidth = 2;
             ctx.strokeStyle = '#00f';
+            if(i === 0 || i === picklist.items.length - 1){
+                rad += 2;
+                ctx.lineWidth += 1;
+            }
             ctx.strokeRect(node.x - rad, node.y - rad, rad * 2, rad * 2);
+        }
+    },
+    render_picklist_labels: function(){
+        var picklist = this.selected_picklist;
+        if(!picklist)return;
+
+        var ctx = this.canvas.getContext('2d');
+
+        for(var i = 0; i < picklist.items.length; i++){
+            var item = picklist.items[i];
+            var node = item.node;
+
+            var label_parts = [];
+            if(i === 0)label_parts.push("START");
+            if(i === picklist.items.length - 1)label_parts.push("END");
+            if(item.label)label_parts.push(item.label);
+            var label = label_parts.join(': ');
+
+            var is_selected = this.node_is_selected(node);
+            var text_h = 16;
+            var bold = false;
+            ctx.fillStyle = '#09f';
+            if(i === 0 || i === picklist.items.length - 1){
+                text_h += 2;
+                bold = true;
+            }
+            ctx.fillStyle = '#000';
+            if(is_selected){
+                ctx.fillStyle = '#900';
+                text_h += 2;
+                bold = true;
+            }
+            ctx.font = font('serif', text_h, bold);
+            var text_w = ctx.measureText(label).width;
+            ctx.fillText(label, node.x - text_w / 2, node.y - text_h / 2);
         }
     },
     render_dragbox: function(){
