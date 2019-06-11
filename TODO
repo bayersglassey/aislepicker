@@ -10,3 +10,6 @@
 * Store X: node labels should be aisles e.g. A1-S2-B4,
     picklist item labels should be products e.g. Pizza, Meat, etc.
     Picklist item labels should be rendered above/below node labels.
+
+* Orders of the day: Set Cereal to end item, Checkout to start item.
+    Then route contains no paths to or from Cereal???
