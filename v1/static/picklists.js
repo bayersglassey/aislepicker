@@ -46,15 +46,16 @@ extend(Picklist.prototype, {
         this.items.push(item);
         return item;
     },
+    update_item_ids: function(){
+        for(var i = 0; i < this.items.length; i++){
+            this.items[i].id = i;
+        }
+    },
     remove_item: function(item){
         var i = this.items.indexOf(item);
         if(i < 0)return;
         this.items.splice(i, 1);
-
-        /* Update item ids */
-        for(var i = 0; i < this.items.length; i++){
-            this.items[i].id = i;
-        }
+        this.update_item_ids();
     },
     get_start_item: function(){
         if(this.items.length === 0)return null;
@@ -69,14 +70,14 @@ extend(Picklist.prototype, {
         if(!item)return;
         this.remove_item(item);
         this.items.unshift(item);
-        item.id = 0;
+        this.update_item_ids();
     },
     set_end_item: function(item){
         if(this.loop)return this.set_start(item);
         if(!item)return;
         this.remove_item(item);
         this.items.push(item);
-        item.id = this.items.length - 1;
+        this.update_item_ids();
     },
     get_serializable_data: function(){
         var items_data = [];

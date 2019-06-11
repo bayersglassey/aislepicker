@@ -714,6 +714,9 @@ extend(SimulationRunner.prototype, {
         var picklist = this.selected_picklist;
         if(!picklist)return;
 
+        var start_item = picklist.get_start_item();
+        var end_item = picklist.get_end_item();
+
         var ctx = this.canvas.getContext('2d');
 
         for(var i = 0; i < picklist.items.length; i++){
@@ -722,7 +725,7 @@ extend(SimulationRunner.prototype, {
             var rad = node.radius + 2;
             ctx.lineWidth = 2;
             ctx.strokeStyle = '#00f';
-            if(i === 0 || i === picklist.items.length - 1){
+            if(item === start_item || item === end_item){
                 rad += 2;
                 ctx.lineWidth += 1;
             }
